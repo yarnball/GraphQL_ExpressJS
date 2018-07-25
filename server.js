@@ -2,9 +2,14 @@ var express = require('express');
 var graphqlHTTP = require('express-graphql');
 var { buildSchema } = require('graphql');
 
-const { createRelation, createPerson, getPeople, getPerson } = require('./data');
+const { createRelation, createPerson, getPeople, getPerson, getApiAction } = require('./data');
 
 const schema = buildSchema(`
+  type getApiAction {
+    Model_Name: String!
+    Model_ID: String!
+  }
+
   type Person {
     id: ID!
     name: String!
@@ -16,15 +21,18 @@ const schema = buildSchema(`
     hello: String
     people: [Person]
     person (id: ID!): Person
+    getApi (make: String!): [getApiAction]
   }
   type Mutation {
     createPerson(name: String!, age: Int): Person
     createRelation(personId: Int, friendId: Int): Person
   }  
 `);
+// USING exclimation means requied field (EG id:ID!)
 // The root provides a resolver function for each API endpoint
 const root = {
   // Queries
+  getApi: args => getApiAction(args),
   hello: () => 'Hello world!',
   people: () => getPeople(),
   person: ({ id }) => getPerson(id),
